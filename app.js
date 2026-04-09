@@ -113,7 +113,13 @@ function loadCards() {
 }
 
 function saveCards(cards = state.cards) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+    return true;
+  } catch (error) {
+    console.error("Failed to save cards:", error);
+    return false;
+  }
 }
 
 function formatDate(iso) {
@@ -329,7 +335,12 @@ function handleFormSubmit(event) {
     });
   }
 
-  saveCards();
+  const saved = saveCards();
+
+  if (!saved) {
+    return;
+  }
+
   closeModal();
   renderCards();
 }

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prompt Card Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Noto+Sans+SC:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="page-header">
+        <p class="eyebrow">Research Toolkit</p>
+        <h1>Prompt Card Manager</h1>
+        <p class="subtitle">卡片化管理研究提示词，快速粘贴内容并一键复制完整指令。</p>
+      </header>
+
+      <section id="promptGrid" class="card-grid" aria-label="Prompt cards"></section>
+    </main>
+
+    <template id="promptCardTemplate">
+      <article class="prompt-card">
+        <div class="card-head">
+          <h2 class="prompt-title"></h2>
+        </div>
+
+        <div class="prompt-body">
+          <p class="body-label">Prompt Text</p>
+          <pre class="prompt-text"></pre>
+        </div>
+
+        <div class="card-input-area">
+          <label class="textarea-label">用户输入内容</label>
+          <textarea
+            class="user-input"
+            rows="6"
+            placeholder="在这里粘贴需要处理的 LaTeX 代码或文本..."
+          ></textarea>
+          <div class="card-actions">
+            <button type="button" class="copy-btn">Copy</button>
+            <span class="copy-status" aria-live="polite"></span>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>

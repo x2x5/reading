@@ -17,37 +17,79 @@
       <header class="page-header">
         <p class="eyebrow">Research Toolkit</p>
         <h1>Prompt Card Manager</h1>
-        <p class="subtitle">卡片化管理研究提示词，快速粘贴内容并一键复制完整指令。</p>
+        <p class="subtitle">卡片化管理研究提示词，支持拖拽排序、完整 CRUD 和本地自动保存。</p>
       </header>
+
+      <section class="toolbar" aria-label="Manager actions">
+        <button id="addCardBtn" type="button" class="btn btn-primary">新增卡片</button>
+        <button id="resetBtn" type="button" class="btn btn-danger">重置所有数据</button>
+      </section>
 
       <section id="promptGrid" class="card-grid" aria-label="Prompt cards"></section>
     </main>
 
     <template id="promptCardTemplate">
-      <article class="prompt-card">
+      <article class="prompt-card" draggable="true">
         <div class="card-head">
-          <h2 class="prompt-title"></h2>
+          <div class="title-wrap">
+            <h2 class="prompt-title"></h2>
+            <span class="category-tag"></span>
+          </div>
+          <div class="head-actions">
+            <button type="button" class="text-btn toggle-btn" aria-expanded="false">展开</button>
+            <button type="button" class="text-btn edit-btn">编辑</button>
+            <button type="button" class="text-btn delete-btn danger">删除</button>
+          </div>
         </div>
 
-        <div class="prompt-body">
-          <p class="body-label">Prompt Text</p>
+        <div class="prompt-meta">
+          <span class="created-at"></span>
+          <span class="drag-hint">拖拽卡片可排序</span>
+        </div>
+
+        <div class="prompt-collapse" hidden>
           <pre class="prompt-text"></pre>
         </div>
 
         <div class="card-input-area">
-          <label class="textarea-label">用户输入内容</label>
+          <label class="textarea-label">输入内容</label>
           <textarea
             class="user-input"
-            rows="6"
-            placeholder="在这里粘贴需要处理的 LaTeX 代码或文本..."
+            rows="5"
+            placeholder="在这里粘贴需要组合到提示词中的内容..."
           ></textarea>
           <div class="card-actions">
-            <button type="button" class="copy-btn">Copy</button>
+            <button type="button" class="btn btn-copy copy-btn">Copy</button>
             <span class="copy-status" aria-live="polite"></span>
           </div>
         </div>
       </article>
     </template>
+
+    <div id="cardModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
+      <div class="modal-panel">
+        <div class="modal-head">
+          <h2 id="modalTitle"></h2>
+          <button id="closeModalBtn" type="button" class="text-btn">关闭</button>
+        </div>
+
+        <form id="cardForm" class="modal-form">
+          <label for="cardTitle">标题</label>
+          <input id="cardTitle" name="title" type="text" maxlength="60" required />
+
+          <label for="cardCategory">分类 / 标签</label>
+          <input id="cardCategory" name="category" type="text" maxlength="30" required />
+
+          <label for="cardPrompt">Prompt 内容</label>
+          <textarea id="cardPrompt" name="promptText" rows="9" required></textarea>
+
+          <div class="modal-actions">
+            <button id="cancelModalBtn" type="button" class="btn">取消</button>
+            <button type="submit" class="btn btn-primary">保存</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <script src="app.js"></script>
   </body>

@@ -1,20 +1,11 @@
 const STORAGE_KEY = "prompt-card-manager:v2";
-
-const DEFAULT_CARDS = [
+const DEFAULT_CARDS_URL = "default-cards.json";
+const FALLBACK_DEFAULT_CARDS = [
   {
-    id: "default-academic-translator",
-    title: "学术翻译官",
-    category: "翻译",
-    promptText: [
-      "Role: 资深计算机科学学术翻译官",
-      "Task: 翻译英文 LaTeX 代码片段为中文",
-      "Constraints:",
-      "- 清洗 LaTeX 语法（删除 \\cite、\\ref 等）",
-      "- 数学公式转自然语言",
-      "- 直译不润色",
-      "- 保持原句式",
-      "Input: [用户粘贴 LaTeX 代码]"
-    ].join("\n"),
+    id: "fallback-card",
+    title: "默认卡片",
+    category: "通用",
+    promptText: "请在 default-cards.json 中添加你的默认卡片。",
     createdAt: "2026-01-01T00:00:00.000Z"
   }
 ];
@@ -49,8 +40,30 @@ function generateId() {
   return `card-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function cloneDefaultCards() {
-  return DEFAULT_CARDS.map((card) => ({ ...card }));
+function cloneCards(cards) {
+  return cards.map((card) => ({ ...card }));
+}
+
+async function loadDefaultCardsFromFile() {
+  try {
+    const response = await window.fetch(DEFAULT_CARDS_URL, { cache: "no-store" });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch default cards: ${response.status}`);
+    }
+
+    const parsed = await response.json();
+    const normalized = normalizeCards(parsed);
+
+    if (normalized.length === 0) {
+      throw new Error("default-cards.json has no valid cards.");
+    }
+
+    return normalized;
+  } catch (error) {
+    console.error("Failed to load default-cards.json, using fallback card:", error);
+    return cloneCards(FALLBACK_DEFAULT_CARDS);
+  }
 }
 
 function normalizeCards(rawCards) {
@@ -87,27 +100,23 @@ function normalizeCards(rawCards) {
   return normalized;
 }
 
-function loadCards() {
+async function loadCards() {
   const saved = window.localStorage.getItem(STORAGE_KEY);
 
-  if (!saved) {
-    const defaults = cloneDefaultCards();
-    saveCards(defaults);
-    return defaults;
-  }
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      const normalized = normalizeCards(parsed);
 
-  try {
-    const parsed = JSON.parse(saved);
-    const normalized = normalizeCards(parsed);
-
-    if (normalized.length > 0) {
-      return normalized;
+      if (normalized.length > 0) {
+        return normalized;
+      }
+    } catch (error) {
+      console.error("Failed to parse stored cards:", error);
     }
-  } catch (error) {
-    console.error("Failed to parse stored cards:", error);
   }
 
-  const defaults = cloneDefaultCards();
+  const defaults = await loadDefaultCardsFromFile();
   saveCards(defaults);
   return defaults;
 }
@@ -345,7 +354,7 @@ function handleFormSubmit(event) {
   renderCards();
 }
 
-function handleReset() {
+async function handleReset() {
   const confirmed = window.confirm("确定重置所有数据吗？这会清空本地修改并恢复默认卡片。");
 
   if (!confirmed) {
@@ -353,7 +362,7 @@ function handleReset() {
   }
 
   window.localStorage.removeItem(STORAGE_KEY);
-  state.cards = cloneDefaultCards();
+  state.cards = await loadDefaultCardsFromFile();
   state.expandedIds.clear();
   state.userInputs = {};
 
@@ -504,8 +513,8 @@ function bindEvents() {
   });
 }
 
-function init() {
-  state.cards = loadCards();
+async function init() {
+  state.cards = await loadCards();
   bindEvents();
   renderCards();
 }

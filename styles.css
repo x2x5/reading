@@ -299,6 +299,10 @@ h1 {
   z-index: 20;
 }
 
+.modal[hidden] {
+  display: none;
+}
+
 .modal-panel {
   width: min(640px, 100%);
   border-radius: 14px;
